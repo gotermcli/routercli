@@ -1,0 +1,30 @@
+# This YAML file contains the commands for "line" mode, found within
+# "configure terminal". This is item 11 of the Framework Gap Roadmap,
+# a persistent, deployment wide default for terminal length, width,
+# and whether the interactive pager runs at all, standing in for what
+# a real Cisco or HP device configures through "line vty" and "line
+# console" instead. See cmd/product/cmd_line.go for the full
+# reasoning, including why this project keeps just one set of
+# defaults today rather than a separate vty and console split.
+
+commands:
+  length:
+    desc_key: line.length.desc
+    minargs: 1
+    maxargs: 1
+    arghelp_key: line.length.arghelp
+    run: line.length
+
+  width:
+    desc_key: line.width.desc
+    minargs: 1
+    maxargs: 1
+    arghelp_key: line.width.arghelp
+    run: line.width
+
+  paging:
+    desc_key: line.paging.desc
+    # "no paging" turns the pager off by default for this deployment.
+    # See cmd/product/cmd_line.go.
+    negatable: true
+    run: line.paging

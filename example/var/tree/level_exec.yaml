@@ -1,0 +1,103 @@
+# This YAML file contains the commands for the "exec" Command Level,
+# reached from the "base" level with "enable".
+
+commands:
+  show:
+    desc_key: show.desc
+    subcommands:
+      aliases:
+        desc_key: show.aliases.desc
+        pageable: true
+        run: show.aliases
+      history:
+        desc_key: show.history.desc
+        pageable: true
+        run: show.history
+      interface:
+        desc_key: show.interface.desc
+        pageable: true
+        run: show.interface
+      running-config:
+        desc_key: show.running_config.desc
+        pageable: true
+        run: show.running-config
+      startup-config:
+        desc_key: show.startup_config.desc
+        pageable: true
+        run: show.startup-config
+      terminal:
+        desc_key: show.terminal.desc
+        pageable: true
+        run: show.terminal
+      users:
+        desc_key: show.users.desc
+        pageable: true
+        # Every currently attached session, real daemon required, see
+        # cmd/core/cmd_show_users.go and
+        # claude/DAEMON_ARCHITECTURE_DESIGN.md's own "ListUsers"
+        # description. Pruned out of this level's own tree entirely
+        # for a deployment with no daemon configured, see main.go's
+        # own featureFlags.
+        requires: daemon
+        run: show.users
+      version:
+        desc_key: show.version.desc
+        pageable: true
+        run: show.version
+
+  disable:
+    desc_key: disable.desc
+    run: disable
+
+  diagnostic-mode:
+    desc_key: diagnostic_mode.desc
+    run: diagnostic-mode
+
+  admin:
+    desc_key: admin.desc
+    run: admin
+
+  configure:
+    desc_key: configure.desc
+    help_key: configure.help
+    subcommands:
+      terminal:
+        desc_key: configure.terminal.desc
+        run: configure.terminal
+
+  set:
+    desc_key: set.desc
+    subcommands:
+      description:
+        desc_key: set.description.desc
+        arghelp_key: set.description.arghelp
+        minargs: 1
+        maxargs: 1
+        maxarglength: 256
+        run: set.description
+
+  audit-log:
+    desc_key: audit_log.desc
+    subcommands:
+      enable:
+        desc_key: audit_log.enable.desc
+        run: audit-log.enable
+      disable:
+        desc_key: audit_log.disable.desc
+        run: audit-log.disable
+      status:
+        desc_key: audit_log.status.desc
+        run: audit-log.status
+
+  language:
+    desc_key: language.desc
+    subcommands:
+      list:
+        desc_key: language.list.desc
+        run: language.list
+      set:
+        desc_key: language.set.desc
+        arghelp_key: language.set.arghelp
+        minargs: 1
+        maxargs: 1
+        run: language.set

@@ -1,0 +1,11 @@
+# This YAML file contains the commands found at the base Command Level for this
+# CLI environment
+
+commands:
+  enable:
+    desc_key: enable.desc
+    run: enable
+
+  user:
+    desc_key: user.desc
+    run: user

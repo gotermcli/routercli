@@ -1,0 +1,132 @@
+# This YAML file defines every Command Level in this CLI's Tree Structure
+#
+# Each tree_file is named relative to this manifest, so the tree files
+# sitting beside it are referenced by bare filename. An absolute path is
+# used as given.
+
+trees:
+  base:
+    tree_file: level_base.yaml
+    is_base: true
+    # No parent, no enter_command. Every session starts here, and
+    # there is nowhere "before" it.
+
+  exec:
+    tree_file: level_exec.yaml
+    parent: base
+    inherit_parent: true
+    enter_command: enable
+    exit_command: disable
+
+  diagnostic:
+    tree_file: level_diagnostic.yaml
+    parent: exec
+    inherit_parent: false
+    enter_command: diagnostic-mode
+    exit_command: exit-diagnostic-mode
+
+  config:
+    tree_file: level_config.yaml
+    parent: exec
+    inherit_parent: true
+    prompt_suffix: "(config)"
+    enter_command: configure.terminal
+    # vendor_defined_password_hash, hidden, and vendor_restricted here
+    # exist to give this project's own test suite, and anyone reading
+    # this file, a real, working example of every property
+    # var/tree/README.md documents for a vendor locked, vendor
+    # restricted Command Level, not as a recommendation that a real
+    # deployment gate its own configure terminal this way. hidden must
+    # be true whenever either of the other two is set, and
+    # vendor_restricted must itself be true whenever
+    # vendor_defined_password_hash is set, both enforced by
+    # command.VerifyVendorDefinedSecrets at startup. vendor_restricted
+    # is what actually keeps this level's own password manager entry
+    # out of "show running-config" and "show startup-config"
+    # entirely, in any form, rather than the "<HIDDEN>" placeholder
+    # those two commands print for an ordinary, ShowSecrets gated
+    # secret; see command.CommandLevel.VendorRestricted's own doc
+    # comment for the full reasoning.
+    vendor_defined_password_hash: $6$$2a$10$gg/5341/r3TKk84ZqEq/SO9awl2rMNp9RSbIOKvR1ZpZbRtZ7dSaC
+    hidden: true
+    vendor_restricted: true
+    # No exit_command. This level is left through the generic "exit"
+    # and "end" commands (cmd/core/cmd_mode_control.go), not a
+    # dedicated named command.
+
+  config-if:
+    tree_file: level_config_if.yaml
+    parent: config
+    inherit_parent: true
+    prompt_suffix: "(config-if)"
+    enter_command: interface
+    # No exit_command, same reasoning as config above. Also note that
+    # "interface <name>" takes an argument, the interface name itself,
+    # that cmd/product/cmd_interface.go stashes on the pushed
+    # ModeFrame.Context. This manifest deliberately knows nothing
+    # about that, only the bare command name.
+
+  config-line:
+    tree_file: level_config_line.yaml
+    parent: config
+    inherit_parent: true
+    prompt_suffix: "(config-line)"
+    enter_command: line
+    # No exit_command, same reasoning as config above. This is item 11
+    # of the Framework Gap Roadmap, cmd/product/cmd_line.go, a single,
+    # deployment wide default for terminal length, width, and paging,
+    # standing in for what a real Cisco or HP device configures through
+    # two separate modes, "line vty" and "line console", see that
+    # file's own doc comment for why this project keeps just one for
+    # now.
+
+  user:
+    tree_file: level_user.yaml
+    parent: base
+    inherit_parent: false
+    prompt_suffix: "(user)"
+    enter_command: user
+    # No exit_command, same reasoning as config above. Reached
+    # directly from base, not from exec, since managing one's own
+    # account, multi-factor enrollment and a password change alike,
+    # only requires being logged in, see cmd/core/cmd_user.go, not the
+    # separate, unrelated privilege step "enable" gates.
+
+  admin:
+    tree_file: level_admin.yaml
+    parent: exec
+    inherit_parent: false
+    prompt_suffix: "(admin)"
+    enter_command: admin
+    exit_command: return.admin
+    # This level carries "show running-config", "show startup-config",
+    # and "erase startup-config", along with both properties below. See
+    # var/tree/README.md's admin section for why an account
+    # administrator needs exactly that visibility.
+    #
+    # allowed_roles gates entry to this level to whichever role in
+    # var/tree/roles.yaml is marked bypass: true, once this
+    # deployment's own AuthRequired, in etc/routercli.yaml, is turned
+    # on. Until then, AuthRequired off, this project's own shipped,
+    # zero setup default, allowed_roles is not enforced at all, and
+    # admin stays reachable by anyone, the same as every other level,
+    # since a library with nothing configured yet must not lock its
+    # own builder out of a level they just declared. See
+    # command.Authorized's own doc comment for the full reasoning, and
+    # RoleSet.BypassRole and var/tree/roles.yaml for what allowed_roles
+    # actually grants once AuthRequired is on.
+    #
+    # grant_auth_bypass: a real, live credential check succeeding
+    # here, whether or not a password was ever configured, in
+    # addition to the role check above, is what AuthBypassTrustWindow,
+    # in etc/routercli.yaml, measures from. show_secrets is what lets
+    # "show running-config" and "show startup-config" show an
+    # ordinary, end user settable password's real hash here instead
+    # of the "<HIDDEN>" placeholder both commands show everywhere
+    # else. It has nothing to do with a vendor defined secret; a level
+    # carrying one of those is always vendor_restricted, see
+    # var/tree/README.md's own vendor_restricted section, and stays
+    # out of both commands entirely regardless of show_secrets.
+    allowed_roles: [admin]
+    grant_auth_bypass: true
+    show_secrets: true

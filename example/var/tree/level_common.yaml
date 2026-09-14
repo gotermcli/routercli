@@ -1,0 +1,39 @@
+# This YAML file contains the common commands that will be loaded and merged in
+# to every other Command Level that is defined. These are merged in at load
+# time.
+
+commands:
+  alias:
+    desc_key: alias.desc
+    help_key: alias.help
+    minargs: 2
+    maxarglength: 256
+    arghelp_key: alias.arghelp
+    # "no alias <alias-name>" removes it. See cmd/core/cmd_alias.go.
+    # Reachable from every Command Level, unlike most other common
+    # commands here, precisely because the level an alias belongs to
+    # is never typed; it is always whichever level a session is
+    # actually standing in when "alias" is run.
+    negatable: true
+    run: alias
+
+  help:
+    desc_key: help.desc
+    arghelp_key: help.arghelp
+    pageable: true
+    run: help
+
+  # "?" is a shorthand alias for "help", hidden from tab completion
+  #     and from the "help" listing itself.
+  "?":
+    desc_key: help.desc
+    alias: help
+    hidden: true
+
+  exit:
+    desc_key: exit.desc
+    run: exit
+
+  end:
+    desc_key: end.desc
+    run: end

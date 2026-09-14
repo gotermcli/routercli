@@ -1,0 +1,130 @@
+# French language catalog for RouterCLI.
+#
+# Deliberately left incomplete. A few keys near the bottom are commented
+# out, on purpose, to demonstrate and exercise the fallback chain
+# described in i18n.go: a missing key here falls back to the English
+# catalog, DefaultLanguage, rather than a blank, silent gap. Try
+# "show interface" after "language set fr" to see English text with
+# nothing broken.
+
+# --- Command descriptions (var/tree/level_*.yaml desc_key values) ---
+configure.desc: "Entrer en mode configuration"
+configure.help: "configure terminal - entrer en mode configuration"
+configure.terminal.desc: "Configurer depuis le terminal"
+set.desc: "Definir une valeur de configuration"
+set.description.desc: "Definir la description de cette session d'exemple"
+show.desc: "Afficher les informations systeme en cours"
+show.running_config.desc: "Afficher la configuration actuelle"
+show.startup_config.desc: "Afficher la configuration de demarrage enregistree"
+show.terminal.desc: "Afficher les parametres actuels du terminal"
+show.version.desc: "Afficher les informations de version"
+enable.desc: "Elever cette session pour executer des commandes privilegiees"
+audit_log.desc: "Controler le journal d'audit"
+audit_log.enable.desc: "Activer le journal d'audit"
+audit_log.disable.desc: "Desactiver le journal d'audit"
+audit_log.status.desc: "Afficher si le journal d'audit est actif"
+language.desc: "Gerer la langue d'affichage active"
+language.list.desc: "Lister les langues disponibles"
+language.set.desc: "Changer la langue active"
+help.desc: "Afficher les commandes disponibles"
+exit.desc: "Quitter ce mode (ou la CLI, si deja au niveau superieur)"
+end.desc: "Revenir au niveau superieur depuis n'importe quel mode"
+user.desc: "Gerer ce compte (mot de passe et authentification multifacteur)"
+totp.desc: "Gerer les codes TOTP a usage unique pour ce compte"
+totp.enable.desc: "Inscrire ce compte a l'authentification a deux facteurs par TOTP"
+totp.enable.qr.desc: "Inscrire ce compte a l'authentification a deux facteurs par TOTP, en affichant un code QR en plus du secret"
+totp.disable.desc: "Retirer l'authentification a deux facteurs par TOTP de ce compte"
+user.password.desc: "Gerer le mot de passe de ce compte"
+password.change.desc: "Changer le mot de passe de ce compte"
+
+# --- Config mode ---
+hostname.desc: "Definir le nom d'hote du systeme"
+interface.desc: "Configurer une interface"
+
+# --- Config-if mode ---
+description_if.desc: "Definir la description de l'interface"
+shutdown.desc: "Desactiver administrativement cette interface"
+no_shutdown.desc: "Activer administrativement cette interface"
+
+# --- Command output text ---
+set.description.confirm: "Description definie."
+show.version.text: "RouterCLI 0.1"
+show.startup_config.text: "% (aucune configuration de demarrage enregistree dans cet exemple)"
+enable.success: "Session elevee."
+enable.already_elevated: "Deja en mode eleve."
+enable.access_denied: "Acces refuse"
+audit_log.enabled: "Journal d'audit active."
+audit_log.disabled: "Journal d'audit desactive."
+audit_log.status_enabled: "Le journal d'audit est actif."
+audit_log.status_disabled: "Le journal d'audit est desactive."
+audit_log.not_configured: "Le journal d'audit n'est pas configure pour cette session"
+audit_log.not_configured_period: "Le journal d'audit n'est pas configure pour cette session."
+user.login_required: "Vous devez etre connecte pour gerer votre compte."
+user.no_current_user: "Impossible de trouver votre fiche utilisateur."
+totp.already_enabled: "Le TOTP est deja active pour ce compte. Executez 'totp disable' d'abord pour le remplacer."
+totp.not_enabled: "Le TOTP n'est pas active pour ce compte."
+totp.enable_secret_intro: "Saisissez ce secret dans votre application d'authentification :"
+totp.enable_intro: "Scannez ce code QR avec votre application d'authentification :"
+totp.enable_manual: "...ou, si vous ne pouvez pas le scanner, saisissez ce secret manuellement :"
+totp.enable_failed: "Ce code n'a pas ete verifie."
+totp.enable_retry: "%d tentative(s) restante(s)."
+totp.enable_attempts_exhausted: "Le TOTP n'a PAS ete active."
+totp.enable_confirm: "TOTP active pour ce compte."
+totp.disable_denied: "Mot de passe ou code TOTP incorrect."
+totp.disable_retry: "%d tentative(s) restante(s)."
+totp.disable_attempts_exhausted: "Le TOTP n'a PAS ete desactive."
+totp.disable_confirm: "TOTP desactive pour ce compte."
+password.change.denied: "Mot de passe ou code incorrect."
+password.change.mismatch: "Les deux mots de passe saisis ne correspondent pas."
+password.change.same_as_current: "Le nouveau mot de passe doit etre different du mot de passe actuel."
+password.change.violation_too_short: "Le nouveau mot de passe doit comporter au moins %d caracteres."
+password.change.violation_too_long: "Le nouveau mot de passe ne doit pas depasser %d octets."
+password.change.violation_needs_uppercase: "Le nouveau mot de passe doit contenir au moins une lettre majuscule."
+password.change.violation_needs_number: "Le nouveau mot de passe doit contenir au moins un chiffre."
+password.change.violation_needs_special_char: "Le nouveau mot de passe doit contenir au moins un caractere special."
+password.change.retry: "%d tentative(s) restante(s)."
+password.change.attempts_exhausted: "Le mot de passe n'a PAS ete change."
+password.change.confirm: "Mot de passe change pour ce compte."
+language.list.header: "Langues disponibles (* = active) :"
+language.set.confirm: "Langue changee vers %s."
+hostname.confirm: "Nom d'hote defini a %s."
+hostname.reset: "Nom d'hote reinitialise par defaut (%s)."
+description_if.confirm: "Description de l'interface definie."
+description_if.cleared: "Description de l'interface effacee."
+shutdown.confirm: "Interface administrativement desactivee."
+no_shutdown.confirm: "Interface administrativement activee."
+show.terminal.geometry_line: "Longueur : %d lignes, Largeur : %d colonnes"
+show.terminal.paging_line: "Pagination : %s (session), %s (globale)"
+show.terminal.filter_mode_line: "Mode de filtrage : %s"
+show.terminal.enabled: "activee"
+show.terminal.disabled: "desactivee"
+show.terminal.filter_mode_substring: "sous-chaine"
+show.terminal.filter_mode_regex: "regex"
+
+# --- Framework / runtime-loop messages ---
+help.header: "Commandes disponibles :"
+runloop.invalid_input: "Entree invalide : %s"
+runloop.incomplete_command: "Commande incomplete : %q"
+runloop.not_negatable: "%q ne prend pas en charge 'no'"
+runloop.idle_timeout: "Delai d'inactivite depasse - session terminee."
+runloop.elevation_expired: "L'acces eleve a expire. Utilisez 'enable' pour vous elever a nouveau."
+runloop.eof_blocked: "Utilisez 'exit' pour quitter."
+runloop.not_pageable: "%q ne prend pas en charge le filtrage ou la pagination."
+
+# --- Invites du pageur (paquet paging) ---
+pager.more_prompt: "--Suite--"
+
+# --- Authentication prompts ---
+auth.username_prompt: "Utilisateur : "
+auth.password_prompt: "Mot de passe : "
+auth.totp_prompt: "Code TOTP : "
+auth.new_password_prompt: "Nouveau mot de passe : "
+auth.confirm_password_prompt: "Confirmez le nouveau mot de passe : "
+auth.login_incorrect: "Identifiants incorrects"
+auth.too_many_attempts: "Trop de tentatives echouees - reessayez dans %s"
+auth.access_denied: "Acces refuse"
+
+# --- Intentionally not translated yet, to demonstrate the fallback to
+# English rather than a silent blank. See this file's header comment. ---
+# show.interface.desc: "..."
+# show.interface.text: "..."

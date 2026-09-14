@@ -1,0 +1,17 @@
+# This YAML file contains the commands for the "interface <name>" Command
+# Level found within "configure terminal"
+
+commands:
+  description:
+    desc_key: description_if.desc
+    arghelp_key: description_if.arghelp
+    minargs: 1
+    maxargs: 1
+    maxarglength: 256
+    negatable: true
+    run: description.interface
+
+  shutdown:
+    desc_key: shutdown.desc
+    negatable: true
+    run: interface.shutdown
