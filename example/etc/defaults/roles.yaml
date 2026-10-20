@@ -1,0 +1,10 @@
+# Factory default copy of var/tree/roles.yaml, restored over the live
+# RolesFile by "restore-factory-defaults", see cmd/core/cmd_admin.go.
+# Keep this in sync with var/tree/roles.yaml's own bypass role name;
+# etc/defaults/users.yaml's own seeded account below is only useful
+# for reaching the admin Command Level if the two agree.
+
+roles:
+  admin:
+    desc: "Full administrative access: account management and the admin Command Level."
+    bypass: true

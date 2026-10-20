@@ -1,0 +1,43 @@
+# This YAML file contains the commands for the "user" Command Level,
+# reached from the base level with "user". Reaching this level requires
+# being logged in, see cmd/core/cmd_user.go, since every command here acts on
+# the current session's own user record.
+
+commands:
+  totp:
+    desc_key: totp.desc
+    requires: totp
+    subcommands:
+      enable:
+        desc_key: totp.enable.desc
+        # Typed alone, this shows only the plain, manually typed
+        # secret. "totp enable qr" below additionally shows a
+        # scannable QR code. Both forms always prompt for the
+        # confirmation code, never accept it as a same-line argument,
+        # matching password-manager's own reasoning in
+        # cmd/core/cmd_password_manager.go. See cmd/core/cmd_totp.go.
+        run: totp.enable
+        subcommands:
+          qr:
+            desc_key: totp.enable.qr.desc
+            run: totp.enable.qr
+      disable:
+        desc_key: totp.disable.desc
+        # Prompts for both the account password and a current TOTP
+        # code before removing the secret, re-authenticating the user
+        # rather than trusting that an already open session is still
+        # the right person at the terminal.
+        run: totp.disable
+
+  password:
+    desc_key: user.password.desc
+    requires: password_change
+    subcommands:
+      change:
+        desc_key: password.change.desc
+        # Always prompts, never accepts anything as a same-line
+        # argument, the same reasoning cmd_password_manager.go and
+        # cmd_totp.go already document. Re-authenticates with the
+        # current password, and a TOTP code too if one is configured,
+        # before ever asking for the new password. See cmd_password.go.
+        run: password.change

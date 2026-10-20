@@ -1,0 +1,6 @@
+users:
+    admin:
+        password: $6$$2a$10$Klxst1xDp3XeMeu0kBRQZ.Yak7F9r3LFBJZdlTVWKI1TdKACL.0Ty
+        roles: [admin]
+# testpass123
+#

@@ -1,0 +1,22 @@
+# Factory default copy of UsersFile, restored over the live UsersFile
+# by "restore-factory-defaults", and also what "erase users" restores
+# to, see cmd/core/cmd_admin.go. This is a deployment's real bootstrap
+# account, not a placeholder: auth.LoadUsers refuses any account with
+# an empty password hash outright, so there is no such thing as an
+# account nobody can ever log in to. The password below really is
+# "changeme", hashed with the exact same auth.HashPassword this
+# project uses everywhere else, and must_change_password below forces
+# it to be replaced with a real one, see main.go's own call to
+# core.RunPasswordChange right after a successful login, the moment
+# anyone actually logs in with it.
+#
+# Keep this file's own username and roles in sync with
+# etc/defaults/roles.yaml's own bypass role name; this account is only
+# useful for reaching the admin Command Level, see var/tree/level_admin.yaml,
+# and assigning roles to everyone else, if the two agree.
+
+users:
+    admin:
+        password: $6$$2a$10$KZLcFNYxcFTNLLR5MRYxo.kxMeSh7nFFD1HCtXykZs2pkOPck8JjG
+        roles: [admin]
+        must_change_password: true

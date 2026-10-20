@@ -1,0 +1,309 @@
+# routercli YAML configuration file
+
+# --- Paths ---
+# BaseDir is the directory every other relative path in this file resolves
+# against. A relative value resolves against the directory holding this
+# file rather than the working directory, so one configuration works
+# whatever directory routercli is started from.
+#
+# This example keeps its configuration in example/etc/ and its data in
+# example/var/, so BaseDir is the parent of this file's directory.
+#
+# Leave it unset to have every path resolve against the working directory.
+# An absolute path anywhere below is never rewritten.
+BaseDir: ".."
+
+# --- Product Identity ---
+# ProductName is this deployment's own display name. It is used to
+# build the centered title of "help <command>"'s own man page style
+# header line, "<ProductName> Help Information", so a project built on
+# top of RouterCLI can show its own name there instead of the
+# framework's. The default is "RouterCLI" itself.
+ProductName: RouterCLI
+
+
+# --- Command Tree Location ---
+TreeStructure: var/tree/tree_structure.yaml
+#
+# CommonTreeFile holds the commands common to every Command Level,
+# help, "?", exit, end, merged into each level at load time unless
+# that level sets skip_common. See MergeCommonCommands, further down,
+# for whether a merged common command sorts alongside every other
+# command in a listing or is appended after them instead.
+CommonTreeFile: var/tree/level_common.yaml
+
+
+# --- Daemon (Shared State) ---
+# DaemonSocketPath is the Unix domain socket a real routerclid
+# process listens on, and a routercli CLI process connects to, for
+# state shared across every attached session rather than each session
+# holding its own separate, driftable copy. See
+# claude/DAEMON_ARCHITECTURE_DESIGN.md for the full design.
+#
+# Left unset, its default, routercli runs exactly as it always has,
+# standalone, one process per connection, its own state freshly loaded
+# at boot, no daemon involved at all. Set this only once a real
+# routerclid binary is actually running, pointed at the same path.
+# Build it with "make build-daemon" from the repository root.
+#
+# The daemon's own static identity key pair, used to authenticate
+# itself to a connecting client, is generated automatically the first
+# time it starts, and written beside the socket path itself, as
+# "<DaemonSocketPath>.key", kept private to the daemon, and
+# "<DaemonSocketPath>.key.pub", read by every connecting CLI client;
+# neither file needs a configuration entry of its own.
+# DaemonSocketPath: var/run/routercli.sock
+
+
+# --- Startup Configuration ---
+# The file the admin level's "write memory" and "erase startup-config"
+# read and write. RouterCLI replays it back in automatically at every
+# process start, before a session can even log in, restoring hostname,
+# interfaces, every Command Level's own saved password, and every
+# runtime defined command alias exactly as they were saved. See
+# StartupConfigFile in etc/README.md for the full explanation.
+StartupConfigFile: var/startup-config/startup-config
+
+# The separate file "write memory" saves a vendor_restricted Command
+# Level's own real, unredacted state to; StartupConfigFile above never
+# holds this content, since a vendor_restricted level's state must
+# never appear in "show running-config" or "show startup-config" at
+# all. Neither "erase startup-config" nor "restore-factory-defaults"
+# ever removes this file. See VendorConfigFile in etc/README.md for
+# the full explanation.
+VendorConfigFile: var/startup-config/vendor-config
+
+
+# --- System, History, and Audit Logs ---
+LogLevel: 1
+LogFile: var/log/system.log
+HistoryFile: var/log/history.log
+AuditLogEnabled: true
+AuditLogFile: var/log/audit.log
+
+
+# --- Prevent Escape ---
+PreventEscape: false
+
+
+# --- Language (i18n) ---
+CurrentLanguage: en
+DefaultLanguage: en
+LanguageDir: var/lang
+
+
+# --- Timeouts ---
+# Both disabled by default. Use Go duration syntax: "10m", "30s", "1h".
+#
+# Close entire session if no activity is seen in given time.
+# SessionIdleTimeout: 10m
+#
+# Automatically demotes an elevated session back to unprivileged after this
+# long, regardless of activity elsewhere.
+# ElevationTimeout: 5m
+#
+# A sudo style grace window. A session that reenters a password protected
+# Command Level within this long of last actually typing that level's
+# password is waved through without being prompted again. See
+# ReauthGracePeriod in etc/README.md for the full explanation, including
+# why this must never be relied on to replay a whole saved configuration.
+# ReauthGracePeriod: 1m
+#
+# How long a real, live password check at a Command Level whose own
+# grant_auth_bypass property is true, the admin level in this project's
+# own shipped tree is trusted
+# broadly enough to also waive every other Command Level's own password
+# check, letting a whole saved configuration paste back in without a
+# prompt at every gated level along the way. Unlike the other timeouts on
+# this page, this one is NOT disabled by default; see AuthBypassTrustWindow
+# in etc/README.md for the full explanation.
+AuthBypassTrustWindow: 5m
+
+
+# --- Authentication ---
+# AuthRequired turns on the login prompt at startup. Off by default so
+# the example works with zero setup. UsersFile is only read when
+# AuthRequired is true.
+AuthRequired: false
+UsersFile: etc/users.yaml
+LoginMaxAttempts: 3
+#
+# EnableHostAuthentication and EnableCLIAuthentication are the two
+# sources a session's identity can come from, and at least one MUST be
+# true whenever AuthRequired is true. EnableHostAuthentication trusts
+# the operating system account routercli is already running as, meant
+# for a deployment reached over SSH where sshd authenticated the Unix
+# account before routercli ever started. EnableCLIAuthentication runs
+# routercli's own interactive username and password login. Both may be
+# true together, see etc/README.md for what that combination means.
+EnableHostAuthentication: false
+EnableCLIAuthentication: true
+#
+# EnableTOTPAuthentication is the system-wide switch for a second
+# factor on top of whichever of the two flags above identifies the
+# account. It cannot stand alone, see etc/README.md.
+EnableTOTPAuthentication: true
+#
+# AuthProviders names every authentication backend this deployment has
+# configured. Only the "local" type, bcrypt hashes in UsersFile, has a
+# real implementation today. CLIAuthProvider names which entry
+# EnableCLIAuthentication's own login prompt checks a password against.
+AuthProviders:
+  - name: local
+    type: local
+CLIAuthProvider: local
+#
+# LoginAttemptWindow and LoginLockoutDuration are both disabled (0) by
+# default, matching RouterCLI's original flat maxAttempts behavior.
+# Uncomment both together, never just one, see etc/README.md, to opt
+# into a real lockout, matching Cisco's own "login block-for X
+# attempts Y within Z":
+# LoginAttemptWindow: 2m
+# LoginLockoutDuration: 5m
+#
+# The same shape, applied to elevating into a Command Level (e.g.
+# "enable") instead of the login prompt. Unlike login, this is
+# unlimited by default, since there was previously no limit here at
+# all:
+# CommandLevelMaxAttempts: 3
+# CommandLevelAttemptWindow: 2m
+# CommandLevelLockoutDuration: 5m
+#
+# ...and again, applied to an individual command's own password_hash
+# (see var/tree/README.md) rather than a whole Command Level's secret:
+# CommandPasswordMaxAttempts: 3
+# CommandPasswordAttemptWindow: 2m
+# CommandPasswordLockoutDuration: 5m
+
+
+# TOTPIssuer is shown in a user's authenticator app next to their
+# account name. It is cosmetic, but every mainstream app displays it.
+# Used by the in-session `totp enable` command, the only way to
+# enroll. Per-user TOTP is opt-in, so only users with a totp_secret
+# set in UsersFile are ever prompted for a code.
+TOTPIssuer: RouterCLI
+#
+# TOTPMaxAttempts is how many times in a row a session may retype a
+# rejected code before `totp enable` or `totp disable` gives up on
+# that attempt, the same idea LoginMaxAttempts already applies to a
+# login prompt above.
+TOTPMaxAttempts: 3
+
+
+# --- Role Based Access Control ---
+# RolesFile declares every role name this deployment recognizes, for
+# use in a Command or Command Level's own allowed_roles list in
+# var/tree/. A missing file is not an error; it simply means
+# allowed_roles is never used anywhere. See var/tree/README.md's own
+# roles section.
+#
+# An allowed_roles list is only actually enforced while AuthRequired,
+# above, is true. With AuthRequired off, this project's own shipped,
+# zero setup default, no session anywhere has a real identity to hold
+# a role against in the first place, so every allowed_roles gate,
+# admin's own in var/tree/tree_structure.yaml included, stays wide
+# open rather than locking a project builder out of a level they just
+# declared. See command.Authorized's own doc comment for the full
+# reasoning.
+RolesFile: var/tree/roles.yaml
+#
+# DefaultsDir holds this deployment's own factory default files, at
+# minimum a skeleton UsersFile seeded with one bootstrap account
+# holding the reserved bypass role. "erase users" and
+# "restore-factory-defaults", both in the admin Command Level, restore
+# from here. See etc/README.md's own factory defaults section.
+DefaultsDir: etc/defaults
+
+
+# --- Password policy, enforced by the "password change" command ---
+# PasswordMinLength is the shortest new password `password change`
+# accepts. NIST 800-63B recommends at least 8; 10 is a slightly
+# stronger default.
+PasswordMinLength: 10
+#
+# The three complexity switches below are all off by default. Current
+# guidance (NIST 800-63B) actually recommends against mandatory
+# composition rules, favoring length instead, since they tend to
+# produce predictable patterns rather than genuinely stronger
+# passwords. They exist here for deployments that still need to meet
+# a composition-based policy. Turn on only what you need:
+# PasswordRequireUppercase: true
+# PasswordRequireNumbers: true
+# PasswordRequireSpecialChars: true
+#
+# PasswordChangeMaxAttempts is how many times in a row `password
+# change` lets a session retry, both re-entering the current password
+# (and a TOTP code, if one is configured) and re-typing a new password
+# that failed to match its own confirmation or the policy above,
+# before giving up on that attempt.
+PasswordChangeMaxAttempts: 3
+
+
+# --- Command listing order, "help", "?", and Tab completion ---
+# AlphabeticalCommandOrder sorts every listing of more than one
+# command name by name, matching real Cisco and HP devices. Turn this
+# off to show commands in the order their own tree file defines them
+# in instead. MergeCommonCommands below MUST be false whenever this is
+# false.
+AlphabeticalCommandOrder: true
+#
+# MergeCommonCommands sorts a common command, help, "?", exit, end,
+# merged into every Command Level from var/tree/level_common.yaml,
+# into its normal alphabetical position among every other command,
+# again matching real Cisco and HP. Turn this off to append every
+# common command after everything else instead, alphabetical among
+# themselves. Setting this true while AlphabeticalCommandOrder above
+# is false is a hard error at startup, since there is then no single
+# combined alphabetical order left to merge common commands into.
+MergeCommonCommands: true
+
+
+# --- Output paging and pipe filtering ---
+# PagingEnabled is the deployment wide switch for the interactive
+# "--More--" pager. It only ever applies to a command whose own tree
+# entry sets "pageable: true", see var/tree/README.md. Turning this off
+# does not disable "| include", "| exclude", or "| begin" filtering
+# itself, only the pause; a Pageable command's output is still filtered,
+# just written straight through afterward with no pause at all. This is
+# only the value used at boot; "configure terminal", then "line", then
+# "paging" or "no paging", changes it afterward, without editing this
+# file, and, once saved, at every future boot too.
+PagingEnabled: true
+#
+# DefaultPageLines is how many lines a session shows before pausing,
+# used only when the real terminal's own height cannot be detected, a
+# non-interactive session for instance, and no "terminal length" has
+# been typed yet this session. When the terminal's height can be
+# detected, that real height is used instead, see
+# paging.EffectivePageLines. The same "line" mode override described
+# above for PagingEnabled applies here too, through "line length".
+DefaultPageLines: 24
+#
+# DefaultHistorySize fixes how many past commands a session's own Up
+# and Down arrow recall remembers, for the whole life of that session,
+# and sets how many lines "show history" shows until a session types
+# "terminal history size <n>" itself, which affects "show history"
+# alone. 500 matches the underlying readline library's own built-in
+# default.
+DefaultHistorySize: 500
+#
+# FilterMatchMode chooses how "| include", "| exclude", and "| begin"
+# match their pattern against each line of output. "substring" is a
+# plain, literal text search, predictable for an operator who never
+# wants to think about regular expression metacharacters, a period in
+# an IP address for instance. "regex" compiles the pattern as a real
+# Go RE2 regular expression, matching exactly what a real Cisco or HP
+# device does. Either value can be switched at runtime, for the current
+# session only, with "terminal filter-mode <substring|regex>".
+FilterMatchMode: substring
+#
+# MaxFilterChainDepth limits how many "| ..." filters may be chained
+# together on one command line, "show running-config | include eth0 |
+# exclude shutdown" being a chain of two. This exists as a security
+# limit, not just a convenience one: an unbounded chain lets a session
+# ask this deployment to do an unbounded amount of filtering work from
+# one typed line. Zero disables filtering entirely; a command line with
+# any "| ..." at all is then refused with an error. A chain deeper than
+# this value is also refused with an error, never silently truncated or
+# run anyway.
+MaxFilterChainDepth: 2

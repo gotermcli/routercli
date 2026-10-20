@@ -1,0 +1,151 @@
+# This YAML file contains the commands for the "admin" Command Level,
+# reached from the "exec" level with "admin", gated by allowed_roles in
+# tree_structure.yaml to whichever role in var/tree/roles.yaml is marked
+# bypass: true. See var/tree/README.md's own admin section.
+#
+# This level carries "show running-config", "show startup-config", and
+# "erase startup-config", registered by cmd/product/cmd_show.go and
+# cmd/product/cmd_startup_config.go and reached here through their
+# already registered names. Saving to disk is "write memory" alone,
+# never a choice between two commands that almost, but not quite, do
+# the same thing. Every other command below is registered by
+# cmd/core/cmd_admin.go.
+
+commands:
+  show:
+    desc_key: show.desc
+    subcommands:
+      running-config:
+        desc_key: show.running_config.desc
+        pageable: true
+        run: show.running-config
+      startup-config:
+        desc_key: show.startup_config.desc
+        pageable: true
+        run: show.startup-config
+
+  write:
+    desc_key: write.desc
+    subcommands:
+      memory:
+        desc_key: write.memory.desc
+        # The classic Cisco synonym for "copy running-config
+        # startup-config", extended here to also save every in memory
+        # change to the user database. See
+        # cmd/product/cmd_startup_config.go's own doc comment for the
+        # full reasoning.
+        run: write.memory
+
+  erase:
+    desc_key: erase.desc
+    subcommands:
+      startup-config:
+        desc_key: erase.startup_config.desc
+        run: erase.startup-config
+      users:
+        desc_key: erase.users.desc
+        # Replaces the live users.yaml with a fresh copy of
+        # DefaultsDir's own skeleton, never a plain delete, see
+        # cmd/core/cmd_admin.go's own doc comment for why an empty
+        # user database would permanently lock every account, admin
+        # role included, out of this level.
+        run: erase.users
+
+  restore-factory-defaults:
+    desc_key: restore_factory_defaults.desc
+    # Erases startup-config, users.yaml, and roles.yaml, restores each
+    # from DefaultsDir, and then reloads. See cmd/core/cmd_admin.go.
+    run: restore-factory-defaults
+
+  reboot:
+    desc_key: reboot.desc
+    help_key: reboot.help
+    arghelp_key: reboot.arghelp
+    maxargs: 1
+    # With no argument, re-reads every persistent file from disk,
+    # rebuilds this session's in-memory state from them, and ends the
+    # connection. With a delay, in seconds, schedules that same thing to
+    # happen unattended and returns immediately. "no reboot" cancels a
+    # scheduled one.
+    negatable: true
+    run: reboot
+
+  # "reload" is an alias for "reboot". They are the same command here.
+  #     A production system may well want them to mean different
+  #     things, at which point this entry gets its own run directive
+  #     and its own handler instead of this alias.
+  reload:
+    desc_key: reload.desc
+    alias: reboot
+
+  disconnect:
+    desc_key: disconnect.desc
+    subcommands:
+      user:
+        desc_key: disconnect.user.desc
+        arghelp_key: disconnect.user.arghelp
+        minargs: 1
+        maxargs: 2
+        maxarglength: 64
+        # A bare username disconnects that user's own one session when
+        # exactly one is attached, and refuses with a candidate listing
+        # when more than one is; a session ID, the same short
+        # identifier "show users" already prints per row, names one
+        # exactly. Real daemon required, see
+        # cmd/core/cmd_admin.go's own runDisconnectUser and
+        # claude/DAEMON_ARCHITECTURE_DESIGN.md's own "DisconnectUser"
+        # description. Pruned out of this level's own tree entirely
+        # for a deployment with no daemon configured, see main.go's
+        # own featureFlags.
+        requires: daemon
+        run: disconnect.user
+
+  account:
+    desc_key: account.desc
+    subcommands:
+      create:
+        desc_key: account.create.desc
+        arghelp_key: account.create.arghelp
+        # Takes one to three tokens: the new username alone, prompting
+        # interactively for its first password; the username followed
+        # by the literal word "generate", auto-generating a password
+        # meeting this deployment's own configured PasswordPolicy; or
+        # the username followed by the literal word "hash" and an
+        # already-computed hash value, imported directly with no
+        # password ever typed. See cmd/core/cmd_admin.go's own doc
+        # comment for the full reasoning, including why only the first
+        # two of these three shapes set MustChangePassword.
+        minargs: 1
+        maxargs: 3
+        maxarglength: 128
+        run: account.create
+      delete:
+        desc_key: account.delete.desc
+        arghelp_key: account.delete.arghelp
+        minargs: 1
+        maxargs: 1
+        maxarglength: 64
+        # Refuses to remove the last account holding the bypass role,
+        # see cmd/core/cmd_admin.go.
+        run: account.delete
+      roles:
+        desc_key: account.roles.desc
+        subcommands:
+          add:
+            desc_key: account.roles.add.desc
+            arghelp_key: account.roles.add.arghelp
+            minargs: 2
+            maxargs: 2
+            maxarglength: 64
+            run: account.roles.add
+          remove:
+            desc_key: account.roles.remove.desc
+            arghelp_key: account.roles.remove.arghelp
+            minargs: 2
+            maxargs: 2
+            maxarglength: 64
+            run: account.roles.remove
+
+  return:
+    desc_key: return_admin.desc
+    run: return.admin

@@ -1,0 +1,17 @@
+# This YAML file contains the commands for the "diagnostic" Command
+# Level, reached from the "exec" level with "diagnostic-mode". It is
+# left with "return", the one consistent word every root swap
+# Command Level in this project's own shipped tree uses to leave
+# itself entirely, see var/tree/level_admin.yaml's own "return" for
+# the other. The underlying registered command, exit-diagnostic-mode,
+# see cmd/product/cmd_diagnostic_mode.go, keeps its own original name;
+# only the word a session actually types changed.
+
+commands:
+  self-test:
+    desc_key: self_test.desc
+    run: diagnostic.self-test
+
+  return:
+    desc_key: exit_diagnostic_mode.desc
+    run: exit-diagnostic-mode

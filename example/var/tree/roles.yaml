@@ -1,0 +1,23 @@
+# This YAML file declares every role name this deployment recognizes,
+# for use in a Command or CommandLevel's own allowed_roles list
+# elsewhere in var/tree/. See command.LoadRoles and
+# command.RoleSet's own doc comments in command/roles.go, and
+# var/tree/README.md's own roles section, for the full reasoning.
+#
+# A deployment that never needs role based access control at all can
+# delete this file entirely; a missing RolesFile is not an error, see
+# LoadRoles, it simply means no command or level anywhere may set
+# allowed_roles, since there would be nothing left to validate one
+# against.
+
+roles:
+  admin:
+    desc: "Full administrative access: account management and the admin Command Level."
+    # At most one role across this whole file may set this. A user
+    # holding it automatically passes every allowed_roles check,
+    # anywhere in the tree, regardless of what that list actually
+    # contains. See RoleSet.BypassRole. This is what lets this
+    # deployment's very first seeded account, see
+    # etc/defaults/users.yaml, reach the admin Command Level and start
+    # assigning ordinary roles to everyone else.
+    bypass: true
